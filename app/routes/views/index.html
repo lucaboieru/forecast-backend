@@ -4,13 +4,26 @@
 	<script type="text/javascript" src="https://code.jquery.com/jquery-latest.js"></script>
 </head>
 <body>
+	<button>Hello</button>
 	<script type="text/javascript">
 		$(document).ready(function (){
 			makeAjaxRequest({
-				operation: "http://127.0.0.1:9090/@/get_resources",
-				data: {}
+				operation: "http://127.0.0.1:9090/@/resources",
+				type: "GET"
 			}, function (err, data) {
 				console.log(data);
+			});
+
+			$("button").click(function () {
+				makeAjaxRequest({
+					operation: "http://127.0.0.1:9090/@/resources",
+					type: "POST",
+					data: {
+						name: "Loo-K"
+					}
+				}, function (err, data) {
+					console.log(data);
+				});
 			});
 		});
 
@@ -18,8 +31,8 @@
 
 		    $.ajax({
 		        url: ajaxObj.operation,
-		        type: "POST",
-		        data: ajaxObj.data,
+		        type: ajaxObj.type || "GET",
+		        data: ajaxObj.data || {},
 		        crossDomain: true,
 		        error: function(jqXHR, exception) {
 		            if (jqXHR.status === 0) {

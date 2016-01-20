@@ -21,13 +21,35 @@ config.routes = {
 config.operations = {
     apiKey: "/@",
     apis: {
-        getExample: {
-            url: "/get_resources",
-            method: "post",
-            path: "resourceController/controller.js"
+        resource: {
+            index: {
+                url: "/resources",
+                method: "get",
+                path: "resourceController/controller.js"
+            },
+            create: {
+                url: "/resources",
+                method: "post",
+                path: "resourceController/controller.js"
+            },
+            show: {
+                url: "/resources/:rid",
+                method: "get",
+                path: "resourceController/controller.js"
+            },
+            destroy: {
+                url: "/resources/:rid",
+                method: "delete",
+                path: "resourceController/controller.js"
+            },
+            update: {
+                url: "/resources/:rid",
+                method: "put",
+                path: "resourceController/controller.js"
+            }
         }
     }
-}
+};
 
 if (PRODUCTION) {
     config.express.ip = "0.0.0.0";

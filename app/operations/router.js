@@ -55,6 +55,16 @@ function handleOperation(req, res, config, operation) {
 
         // call operation
         operations_cache[operation](source);
+    } else if (req.method === 'PUT') {
+        source.data = req.body;
+
+        // call operation
+        operations_cache[operation](source);
+    } else if (req.method === 'DELETE') {
+        source.data = req.query;
+
+        // call operation
+        operations_cache[operation](source);
     }
 }
 
@@ -68,33 +78,42 @@ module.exports = function (core) {
     require('./sockets')(core);
 
     // init operations
-    for (var operation in config.operations.apis) {
+    for (var module in config.operations.apis) {
+        for (var operation in config.operations.apis[module]) {
 
-        (function (operation) {
+            (function (operation) {
 
-            // validate operation method
-            if (!config.operations.apis[operation].method) {
-                log.error('Method not configured for operation: ' + operation);
-                return;
-            }
+                // validate operation method
+                if (!config.operations.apis[module][operation].method) {
+                    log.error('Method not configured for operation: ' + operation);
+                    return;
+                }
 
-            // validate operation url
-            if (!config.operations.apis[operation].url) {
-                log.error('Url not configured for operation: ' + operation);
-                return;
-            }
+                // validate operation url
+                if (!config.operations.apis[module][operation].url) {
+                    log.error('Url not configured for operation: ' + operation);
+                    return;
+                }
 
-            // listen for api requests (POST or GET)
-            if (config.operations.apis[operation].method == 'get') {
-                router.get(config.operations.apiKey + config.operations.apis[operation].url, function (req, res) {
-                    handleOperation(req, res, config.operations.apis[operation], operation);
-                });
-            } else if (config.operations.apis[operation].method == 'post') {
-                router.post(config.operations.apiKey + config.operations.apis[operation].url, function (req, res) {
-                    handleOperation(req, res, config.operations.apis[operation], operation);
-                });
-            }
-        })(operation);
+                // listen for api requests (POST or GET)
+                if (config.operations.apis[module][operation].method == 'get') {
+                    router.get(config.operations.apiKey + config.operations.apis[module][operation].url, function (req, res) {
+                        handleOperation(req, res, config.operations.apis[module][operation], operation);
+                    });
+                } else if (config.operations.apis[module][operation].method == 'post') {
+                    router.post(config.operations.apiKey + config.operations.apis[module][operation].url, function (req, res) {
+                        handleOperation(req, res, config.operations.apis[module][operation], operation);
+                    });
+                } else if (config.operations.apis[module][operation].method == 'put') {
+                    router.put(config.operations.apiKey + config.operations.apis[module][operation].url, function (req, res) {
+                        handleOperation(req, res, config.operations.apis[module][operation], operation);
+                    });
+                } else if (config.operations.apis[module][operation].method == 'delete') {
+                    router.delete(config.operations.apiKey + config.operations.apis[module][operation].url, function (req, res) {
+                        handleOperation(req, res, config.operations.apis[module][operation], operation);
+                    });
+                }
+            })(operation);
+        }
     }
-
 }
