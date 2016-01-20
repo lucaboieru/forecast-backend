@@ -2,8 +2,6 @@ var mongo = require("../../lib/mongo");
 var ObjectId = mongo.ObjectID;
 
 exports.index = function (source) {
-
-	source.res.setHeader('Access-Control-Allow-Origin', '*');
     
     // fetch db object
     mongo.connect("forecast", function (err, db) {
@@ -37,8 +35,6 @@ exports.index = function (source) {
 exports.create = function (source) {
 
 	var resourceData = source.data;
-
-	source.res.setHeader('Access-Control-Allow-Origin', '*');
     
     // fetch db object
     mongo.connect("forecast", function (err, db) {
@@ -57,7 +53,7 @@ exports.create = function (source) {
             }
 
             // insert new resource
-            col.insert({name: resourceData.name}, function (err, data) {
+            col.insert(resourceData, function (err, data) {
 
           		if (err) {
           			return source.res.status(500).send(JSON.stringify(err));
@@ -72,8 +68,6 @@ exports.create = function (source) {
 exports.show = function (source) {
 
 	var rid = source.req.params.rid;
-
-	source.res.setHeader('Access-Control-Allow-Origin', '*');
     
     // fetch db object
     mongo.connect("forecast", function (err, db) {
@@ -107,8 +101,6 @@ exports.show = function (source) {
 exports.destroy = function (source) {
 
 	var rid = source.req.params.rid;
-
-	source.res.setHeader('Access-Control-Allow-Origin', '*');
     
     // fetch db object
     mongo.connect("forecast", function (err, db) {
@@ -144,8 +136,6 @@ exports.update = function (source) {
 	var rid = source.req.params.rid;
 	var resourceData = source.data;
 	resourceData._id = ObjectId(rid);
-
-	source.res.setHeader('Access-Control-Allow-Origin', '*');
     
     // fetch db object
     mongo.connect("forecast", function (err, db) {
