@@ -47,6 +47,18 @@ config.operations = {
                 method: "put",
                 path: "resourceController/controller.js"
             }
+        },
+        skill: {
+            index: {
+                url: "/skills",
+                method: "get",
+                path: "skillController/controller.js"
+            },
+            create: {
+                url: "/skills",
+                method: "post",
+                path: "skillController/controller.js"
+            }
         }
     }
 };
