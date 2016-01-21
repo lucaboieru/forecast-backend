@@ -12,7 +12,7 @@ var s = {
     sockets: {}
 };
 
-function handleOperation(req, res, config, operation) {
+function handleOperation(req, res, config, operation, module) {
 
     // check if user has permission to run this operation
     if (config.access && config.access.roles) {
@@ -23,12 +23,18 @@ function handleOperation(req, res, config, operation) {
         }
     }
 
-    console.log(join(__dirname + '/' + config.path));
+    console.log(module, operation, join(__dirname + '/' + config.path));
 
     // cache operation file it isn't already
-    if (!operations_cache[operation]) {
+    if (!operations_cache[module]) {
+        
+        // create module cache object
+        operations_cache[module] = {};
+    }
+
+    if (!operations_cache[module][operation]) {
         try {
-            operations_cache[operation] = require(join(__dirname, config.path))[operation];
+            operations_cache[module][operation] = require(join(__dirname, config.path))[operation];
         } catch (error) {
             log.error(error, 'Error while caching operation: ' + operation);
             return res.status(500).send('Error while caching operation: ' + operation);
@@ -49,22 +55,22 @@ function handleOperation(req, res, config, operation) {
         source.data = req.body;
 
         // call operation
-        operations_cache[operation](source);
+        operations_cache[module][operation](source);
     } else if (req.method === 'GET') {
         source.data = req.query;
 
         // call operation
-        operations_cache[operation](source);
+        operations_cache[module][operation](source);
     } else if (req.method === 'PUT') {
         source.data = req.body;
 
         // call operation
-        operations_cache[operation](source);
+        operations_cache[module][operation](source);
     } else if (req.method === 'DELETE') {
         source.data = req.query;
 
         // call operation
-        operations_cache[operation](source);
+        operations_cache[module][operation](source);
     }
 }
 
@@ -79,41 +85,45 @@ module.exports = function (core) {
 
     // init operations
     for (var module in config.operations.apis) {
-        for (var operation in config.operations.apis[module]) {
 
-            (function (operation) {
+        (function (module) {
 
-                // validate operation method
-                if (!config.operations.apis[module][operation].method) {
-                    log.error('Method not configured for operation: ' + operation);
-                    return;
-                }
+            for (var operation in config.operations.apis[module]) {
 
-                // validate operation url
-                if (!config.operations.apis[module][operation].url) {
-                    log.error('Url not configured for operation: ' + operation);
-                    return;
-                }
+                (function (operation) {
 
-                // listen for api requests (POST or GET)
-                if (config.operations.apis[module][operation].method == 'get') {
-                    router.get(config.operations.apiKey + config.operations.apis[module][operation].url, function (req, res) {
-                        handleOperation(req, res, config.operations.apis[module][operation], operation);
-                    });
-                } else if (config.operations.apis[module][operation].method == 'post') {
-                    router.post(config.operations.apiKey + config.operations.apis[module][operation].url, function (req, res) {
-                        handleOperation(req, res, config.operations.apis[module][operation], operation);
-                    });
-                } else if (config.operations.apis[module][operation].method == 'put') {
-                    router.put(config.operations.apiKey + config.operations.apis[module][operation].url, function (req, res) {
-                        handleOperation(req, res, config.operations.apis[module][operation], operation);
-                    });
-                } else if (config.operations.apis[module][operation].method == 'delete') {
-                    router.delete(config.operations.apiKey + config.operations.apis[module][operation].url, function (req, res) {
-                        handleOperation(req, res, config.operations.apis[module][operation], operation);
-                    });
-                }
-            })(operation);
-        }
+                    // validate operation method
+                    if (!config.operations.apis[module][operation].method) {
+                        log.error('Method not configured for operation: ' + operation);
+                        return;
+                    }
+
+                    // validate operation url
+                    if (!config.operations.apis[module][operation].url) {
+                        log.error('Url not configured for operation: ' + operation);
+                        return;
+                    }
+
+                    // listen for api requests (POST or GET)
+                    if (config.operations.apis[module][operation].method == 'get') {
+                        router.get(config.operations.apiKey + config.operations.apis[module][operation].url, function (req, res) {
+                            handleOperation(req, res, config.operations.apis[module][operation], operation, module);
+                        });
+                    } else if (config.operations.apis[module][operation].method == 'post') {
+                        router.post(config.operations.apiKey + config.operations.apis[module][operation].url, function (req, res) {
+                            handleOperation(req, res, config.operations.apis[module][operation], operation, module);
+                        });
+                    } else if (config.operations.apis[module][operation].method == 'put') {
+                        router.put(config.operations.apiKey + config.operations.apis[module][operation].url, function (req, res) {
+                            handleOperation(req, res, config.operations.apis[module][operation], operation, module);
+                        });
+                    } else if (config.operations.apis[module][operation].method == 'delete') {
+                        router.delete(config.operations.apiKey + config.operations.apis[module][operation].url, function (req, res) {
+                            handleOperation(req, res, config.operations.apis[module][operation], operation, module);
+                        });
+                    }
+                })(operation);
+            }
+        })(module);
     }
 }
