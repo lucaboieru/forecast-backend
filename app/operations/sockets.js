@@ -31,6 +31,8 @@ module.exports = function (core) {
         var host = socket.request.headers.host;
         var path = socket.request.headers.referer;
 
+        if (!path) return;
+        
         // build sockets object
         path = path.slice(path.indexOf(host) + host.length);
         for (var route in config.routes) {

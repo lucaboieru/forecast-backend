@@ -39,10 +39,12 @@ io.use(function(socket, next) {
     sessionMiddleware(socket.request, socket.request.res, next);
 });
 
+// body parser configuration
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(multer());
 
+// allow cross domain requests
 app.use(function (req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
   res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');

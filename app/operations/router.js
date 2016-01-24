@@ -23,8 +23,6 @@ function handleOperation(req, res, config, operation, module) {
         }
     }
 
-    console.log(module, operation, join(__dirname + '/' + config.path));
-
     // cache operation file it isn't already
     if (!operations_cache[module]) {
         
@@ -50,7 +48,7 @@ function handleOperation(req, res, config, operation, module) {
         res: res
     }
 
-    // handle POST and GET request data
+    // handle POST, GET, PUT and DELETE request data
     if (req.method === 'POST') {
         source.data = req.body;
 
@@ -104,7 +102,7 @@ module.exports = function (core) {
                         return;
                     }
 
-                    // listen for api requests (POST or GET)
+                    // listen for api requests (POST, GET, PUT, DELETE)
                     if (config.operations.apis[module][operation].method == 'get') {
                         router.get(config.operations.apiKey + config.operations.apis[module][operation].url, function (req, res) {
                             handleOperation(req, res, config.operations.apis[module][operation], operation, module);
