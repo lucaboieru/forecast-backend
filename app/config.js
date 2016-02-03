@@ -59,6 +59,18 @@ config.operations = {
                 method: "post",
                 path: "skillController/controller.js"
             }
+        },
+        skill: {
+            show: {
+                url: "/users/:uid",
+                method: "get",
+                path: "userController/controller.js"
+            },
+            create: {
+                url: "/users",
+                method: "post",
+                path: "userController/controller.js"
+            }
         }
     }
 };

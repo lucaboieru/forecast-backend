@@ -1,43 +1,20 @@
 var express = require('express');
+var mongoose = require('mongoose');
 var path = require('path');
-var session = require('express-session');
-var MongoStore  = require('connect-mongo')(session);
 var bodyParser = require('body-parser');
 var multer = require('multer');
-var engines = require('consolidate');
-var errorHandler = require('errorhandler');
-var config = require(__dirname + '/config');
 
+// require controllers
+var resourceController = require('./controllers/resources');
+var skillController = require('./controllers/skills');
+var userController = require('./controllers/users');
+var periodController = require('./controllers/periods');
+var APIProjectController = require('./controllers/projects');
+var APIResourceController = require('./controllers/APIResourceController');
+
+// create express app and http server
 var app = express();
 var server = require('http').Server(app);
-var io = require('socket.io')(server);
-
-// define logger
-var bole = require('bole');
-bole.output({level: 'debug', stream: process.stdout});
-var log = bole('server');
-
-// all environments
-app.set('views', __dirname);
-app.engine('jade', engines.jade);
-app.engine('html', engines.ejs);
-
-// session
-var sessionMiddleware = session({
-    secret: 'S0MS3Kr37',
-    saveUninitialized: false, // don't create session until something stored
-    resave: false, // don't save session if unmodified
-    store: new MongoStore({
-        url: 'mongodb://localhost/source',
-        ttl: 365 * 24 * 60 * 60
-    })
-});
-app.use(sessionMiddleware);
-
-// handle session for sockets
-io.use(function(socket, next) {
-    sessionMiddleware(socket.request, socket.request.res, next);
-});
 
 // body parser configuration
 app.use(bodyParser.json());
@@ -46,22 +23,64 @@ app.use(multer());
 
 // allow cross domain requests
 app.use(function (req, res, next) {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
-  res.header("Access-Control-Allow-Headers", "X-Requested-With, Content-Type");
-  next();
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+    res.header("Access-Control-Allow-Headers", "X-Requested-With, Content-Type");
+    next();
 });
 
-// handle application routes
-app.use(require(__dirname + '/routes/router'));
+// Connect to the beerlocker MongoDB
+mongoose.connect('mongodb://localhost:27017/forecast');
 
-// handle application operations (apis)
-require(__dirname + '/operations/router')({
-    app: app,
-    io: io
-});
+// Create Express router
+var router = express.Router();
 
-// handle 404
-app.use(require(__dirname + '/errors/notFound'));
+// RESOURCE API
+router.route('/resources')
+    .post(resourceController.create)
+    .get(resourceController.index);
+
+router.route('/resources/:rid')
+    .get(resourceController.show)
+    .put(resourceController.update)
+    .delete(resourceController.remove);
+
+// SKILL API
+router.route('/skills')
+    .post(skillController.create)
+    .get(skillController.index);
+
+router.route('/skills/:sid')
+    .get(skillController.show)
+    .put(skillController.update)
+    .delete(skillController.remove);
+
+// USER API
+router.route('/users')
+    .post(userController.create)
+    .get(userController.index);
+
+router.route('/users/:uid')
+    .get(userController.show);
+    //.put(userController.update)
+    //.delete(userController.remove);
+
+// PERIOD API
+router.route('/periods')
+    .post(periodController.create)
+    .get(periodController.index);
+
+router.route('/periods/:pid')
+    .get(periodController.show);
+    //.put(periodController.update)
+    //.delete(periodController.remove);
+
+// REMOTE API ROUTES
+router.route('/projects')
+    .get(APIProjectController.index);
+router.route('/all_resources')
+    .get(APIResourceController.index);
+
+app.use('/@', router);
 
 server.listen(process.argv[2] || config.express.port);
