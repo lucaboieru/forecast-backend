@@ -1,5 +1,6 @@
 // Load required packages
 var mongoose = require('mongoose');
+var ObjectId = mongoose.Schema.ObjectId;
 
 // Define user schema
 var UserSchema = new mongoose.Schema({
@@ -16,19 +17,25 @@ var UserSchema = new mongoose.Schema({
     	required: true,
     	default: "1234"
     },
-    passwordChanged: {
+    password_changed: {
     	type: Boolean,
     	default: false
     },
-    role: {
-    	type: String,
-    	required: true
-    },
     email: {
-    	type: String,
-    	unique: true,
-    	required: true
+        type: String,
+        unique: true,
+        required: true
     },
+    role: {
+    	bum: {
+            type: ObjectId,
+            ref: 'BusinessUnitManager'
+        },
+        devman: {
+            type: ObjectId,
+            ref: 'DevelopmentManager'
+        }
+    }
 });
 
 // Export the Mongoose model

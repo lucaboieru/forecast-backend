@@ -1,17 +1,52 @@
 var UserModel = require('../models/user');
+var BusinessUnitManagerModel = require('../models/bum');
+var DevelopmentManagerModel = require('../models/devman');
 
 exports.create = function (req, res) {
 
+    var userData = req.body;
+
     // create new user
-    var newUser = new UserModel(req.data);
+    if (userData.role === 'development_manager') {
 
-    newUser.save(function (err) {
-        if (err) {
-            return res.status(400).send(err);
-        }
+        var newRole = new DevelopmentManagerModel();
 
-        res.status(200).send('ok');
-    });
+        newRole.save(function (err, role) {
+            if (err) {
+                return res.status(500).send(err);
+            }
+
+            userData.role = {};
+            userData.role.devman = role._id;
+            var newUser = new UserModel(userData);
+            newUser.save(function (err, user) {
+                if (err) {
+                    return res.status(400).send(err);
+                }
+
+                res.status(200).send(user);
+            });
+        });
+    } else if (userData.role === 'business_unit_manager') {
+        var newRole = new BusinessUnitManagerModel();
+
+        newRole.save(function (err, role) {
+            if (err) {
+                return res.status(500).send(err);
+            }
+
+            userData.role = {};
+            userData.role.bum = role._id;
+            var newUser = new UserModel(userData);
+            newUser.save(function (err, user) {
+                if (err) {
+                    return res.status(400).send(err);
+                }
+
+                res.status(200).send(user);
+            });
+        });
+    }
 };
 
 exports.show = function (req, res) {
@@ -19,23 +54,23 @@ exports.show = function (req, res) {
     var uid = req.params.uid;
 
     // do find
-    UserModel.findById(uid, function(err, user) {
+    UserModel.findById(uid).populate("role.bum").populate("role.devman").exec(function(err, user) {
         if (err) {
-            return res.status(400).send(err)
+            return res.status(400).send(err);
         }
 
-        res.status(200).send(JSON.stringify(user));
+        res.status(200).send(user);
     });
 };
 
 exports.index = function (req, res) {
 
     // do find
-    UserModel.find(function(err, users) {
+    UserModel.find().populate("role.bum").populate("role.devman").exec(function(err, users) {
         if (err) {
-            return res.status(400).send(err)
+            return res.status(400).send(err);
         }
 
-        res.status(200).send(JSON.stringify(users));
+        res.status(200).send(users);
     });
 };
