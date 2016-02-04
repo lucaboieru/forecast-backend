@@ -5,10 +5,58 @@ var ResourceModel = require('../models/resource');
 var UserModel = require('../models/user');
 var DevelopmentManagerModel = require('../models/devman');
 
+exports.getTeam = function (req, res) {
+
+    DevelopmentManagerModel
+    .findById(req.params.role_id)
+    .exec(function (err, resources) {
+
+        if (err) {
+            return res.status(400).send(err);
+        }
+
+        res.status(200).send(JSON.stringify(resources));
+    });
+};
+
+exports.addToTeam = function (req, res) {
+
+	// create new user
+    var newResource = new ResourceModel(req.body);
+
+    newResource.save(function (err, resource) {
+        if (err) {
+            return res.status(400).send(err);
+        }
+
+        var crudObj = {
+            q: {
+                _id: req.params.role_id
+            },
+            u: {
+                $addToSet: {team: resource._id}
+            },
+            o: {
+                upsert: true
+            }
+        };
+
+        DevelopmentManagerModel.findOneAndUpdate(crudObj.q, crudObj.u, crudObj.o, function (err, resource) {
+
+            if (err) {
+                return res.status(500).send(err);
+            }
+
+            res.status(200).send('ok');
+        });
+    });
+};
+
 exports.index = function (req, res) {
 
     DevelopmentManagerModel
     .findById(req.params.role_id)
+    .populate("team")
     .populate("team.skills")
     .populate("team.schedule")
     .exec(function (err, resources) {
@@ -51,39 +99,6 @@ exports.index = function (req, res) {
             } else {
                 res.status(500).send(error);
             }
-        });
-    });
-};
-
-exports.addToTeam = function (req, res) {
-
-	// create new user
-    var newResource = new ResourceModel(req.body);
-
-    newResource.save(function (err, resource) {
-        if (err) {
-            return res.status(400).send(err);
-        }
-
-        var crudObj = {
-            q: {
-                _id: req.params.role_id
-            },
-            u: {
-                $addToSet: {team: resource._id}
-            },
-            o: {
-                upsert: true
-            }
-        };
-
-        DevelopmentManagerModel.findOneAndUpdate(crudObj.q, crudObj.u, crudObj.o, function (err, resource) {
-
-            if (err) {
-                return res.status(500).send(err);
-            }
-
-            res.status(200).send('ok');
         });
     });
 };

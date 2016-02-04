@@ -38,6 +38,8 @@ var router = express.Router();
 // RESOURCE API
 router.route('/add_to_team/:role_id')
     .post(resourceController.addToTeam);
+router.route('/get_team/:role_id')
+    .get(resourceController.getTeam);
 
 router.route('/resources/:role_id')
     .get(resourceController.index);
