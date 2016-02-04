@@ -7,7 +7,7 @@ var DevelopmentManager = new mongoose.Schema({
     team: [
     	{
 	    	type: ObjectId,
-	    	ref: 'Resources'
+	    	ref: 'Resource'
 	    }
     ]
 });
