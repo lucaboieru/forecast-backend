@@ -66,7 +66,7 @@ exports.show = function (req, res) {
 exports.index = function (req, res) {
 
     // do find
-    UserModel.find().populate("role.bum").populate("role.devman").exec(function(err, users) {
+    UserModel.find({}, {password: false}).populate("role.bum").populate("role.devman").exec(function(err, users) {
         if (err) {
             return res.status(400).send(err);
         }
@@ -81,10 +81,13 @@ exports.login = function (req, res) {
         q: {
             email: req.body.email,
             password: req.body.password
+        },
+        o: {
+            password: false
         }
     };
 
-    UserModel.findOne(crudObj.q, function (err, user) {
+    UserModel.findOne(crudObj.q, crudObj.o, function (err, user) {
         if (err) {
             return res.status(500).send(err);
         }
@@ -93,7 +96,6 @@ exports.login = function (req, res) {
             return res.status(404).send(err);
         }
 
-        user.password = undefined;
         res.status(200).send(user);
     });
 };
