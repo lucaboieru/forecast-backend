@@ -1,9 +1,17 @@
 var request = require('request');
-var ResourceModel = require('../models/resource.js');
 var api_uri = "http://52.20.76.156:8888/api/";
 
+var ResourceModel = require('../models/resource');
+var UserModel = require('../models/user');
+var DevelopmentManagerModel = require('../models/devman');
+
 exports.index = function (req, res) {
-    ResourceModel.find().populate("skills").populate("schedule").exec(function (err, resources) {
+    DevelopmentManagerModel
+    .findById(req.params.role_id)
+    .populate("team.skills")
+    .populate("team.schedule")
+    .exec(function (err, resources) {
+
         if (err) {
             return res.status(400).send(err);
         }
@@ -46,17 +54,36 @@ exports.index = function (req, res) {
     });
 };
 
-exports.create = function (req, res) {
+exports.addToTeam = function (req, res) {
 
 	// create new user
     var newResource = new ResourceModel(req.body);
 
-    newResource.save(function (err) {
+    newResource.save(function (err, resource) {
         if (err) {
             return res.status(400).send(err);
         }
 
-        res.status(200).send('ok');
+        var crudObj = {
+            q: {
+                _id: req.params.role_id
+            },
+            u: {
+                $addToSet: {team: resource._id}
+            },
+            o: {
+                upsert: true
+            }
+        }
+
+        DevelopmentManagerModel.findOneAndUpdate(crudObj.q, crudObj.u, crudObj.o, function (err, resource) {
+
+            if (err) {
+                return res.status(500).send(err);
+            }
+
+            res.status(200).send('ok');
+        });
     });
 };
 

@@ -74,3 +74,26 @@ exports.index = function (req, res) {
         res.status(200).send(users);
     });
 };
+
+exports.login = function (req, res) {
+
+    var crudObj = {
+        q: {
+            email: req.body.email,
+            password: req.body.password
+        }
+    };
+
+    UserModel.findOne(crudObj.q, function (err, user) {
+        if (err) {
+            return res.status(500).send(err);
+        }
+
+        if (!user) {
+            return res.status(404).send(err);
+        }
+
+        user.password = undefined;
+        res.status(200).send(user);
+    });
+};

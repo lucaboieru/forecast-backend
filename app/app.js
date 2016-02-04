@@ -36,8 +36,10 @@ mongoose.connect('mongodb://localhost:27017/forecast');
 var router = express.Router();
 
 // RESOURCE API
+router.route('/add_to_team/:role_id')
+    .post(resourceController.addToTeam);
+
 router.route('/resources')
-    .post(resourceController.create)
     .get(resourceController.index);
 
 router.route('/resources/:rid')
@@ -64,6 +66,10 @@ router.route('/users/:uid')
     .get(userController.show);
     //.put(userController.update)
     //.delete(userController.remove);
+
+// PERIOD API
+router.route('/login')
+    .post(userController.login)
 
 // PERIOD API
 router.route('/periods')

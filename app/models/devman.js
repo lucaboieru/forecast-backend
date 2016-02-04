@@ -4,11 +4,6 @@ var ObjectId = mongoose.Schema.ObjectId;
 
 // Define user schema
 var DevelopmentManager = new mongoose.Schema({
-    role: {
-        type: String,
-        required: true,
-        default: "development_manager"
-    },
     team: [
     	{
 	    	type: ObjectId,
