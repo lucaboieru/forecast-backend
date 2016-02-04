@@ -52,6 +52,26 @@ exports.addToTeam = function (req, res) {
     });
 };
 
+exports.removeFromTeam = function (req, res) {
+
+    var params = req.params;
+
+    ResourceModel.remove({resource_id: params.resource_id}, function (err) {
+
+        if (err) {
+            return res.status(500).send(err);
+        }
+
+        DevelopmentManagerModel.update({_id: params.role_id}, {$pull: {team: params.resource_id}}, function (err) {
+            if (err) {
+                return res.status(500).send(err);
+            }
+
+            res.status(200).send("ok");
+        });
+    });
+};
+
 exports.index = function (req, res) {
 
     DevelopmentManagerModel

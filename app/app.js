@@ -36,10 +36,12 @@ mongoose.connect('mongodb://localhost:27017/forecast');
 var router = express.Router();
 
 // RESOURCE API
-router.route('/add_to_team/:role_id')
-    .post(resourceController.addToTeam);
-router.route('/get_team/:role_id')
-    .get(resourceController.getTeam);
+router.route('/team/:role_id')
+    .post(resourceController.addToTeam)
+    .get(resourceController.getTeam)
+
+router.route('/team/:role_id/:resource_id')
+    .delete(resourceController.removeFromTeam);
 
 router.route('/resources/:role_id')
     .get(resourceController.index);
