@@ -99,8 +99,12 @@ exports.login = function (req, res) {
         user = user.toObject();
 
         if (user.role.devman) {
+            user.role.team_id = user.role.devman;
+            delete user.role.devman;
             user.role.name = "development_manager";
         } else if (user.role.bum) {
+            user.role.role_id = user.role.bum;
+            delete user.role.bum;
             user.role.name = "business_unit_manager";
         }
         res.status(200).send(user);
