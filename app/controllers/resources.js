@@ -6,6 +6,7 @@ var UserModel = require('../models/user');
 var DevelopmentManagerModel = require('../models/devman');
 
 exports.index = function (req, res) {
+
     DevelopmentManagerModel
     .findById(req.params.role_id)
     .populate("team.skills")

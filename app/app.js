@@ -39,7 +39,7 @@ var router = express.Router();
 router.route('/add_to_team/:role_id')
     .post(resourceController.addToTeam);
 
-router.route('/resources')
+router.route('/resources/:role_id')
     .get(resourceController.index);
 
 router.route('/resources/:rid')
