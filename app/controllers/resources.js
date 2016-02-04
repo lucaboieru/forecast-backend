@@ -74,7 +74,7 @@ exports.addToTeam = function (req, res) {
             o: {
                 upsert: true
             }
-        }
+        };
 
         DevelopmentManagerModel.findOneAndUpdate(crudObj.q, crudObj.u, crudObj.o, function (err, resource) {
 
