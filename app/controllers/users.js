@@ -96,6 +96,12 @@ exports.login = function (req, res) {
             return res.status(404).send(err);
         }
 
+        if (user.role.hasOwnProperty("devman"))
+            user.role.name = "development_manager";
+        } else if (user.role.hasOwnProperty("bum")) {
+            user.role.name = "business_unit_manager";
+        }
+
         res.status(200).send(user);
     });
 };
