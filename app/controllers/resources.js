@@ -41,7 +41,7 @@ exports.addToTeam = function (req, res) {
                 _id: req.params.role_id
             },
             u: {
-                $addToSet: {team: resource.resource_id}
+                $addToSet: {team: resource._id}
             },
             o: {
                 upsert: true
