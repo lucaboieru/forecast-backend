@@ -4,6 +4,8 @@ var api_uri = "http://52.20.76.156:8888/api/";
 var ResourceModel = require('../models/resource');
 var UserModel = require('../models/user');
 var DevelopmentManagerModel = require('../models/devman');
+var ScheduleModel = require('../models/schedule');
+var PeriodModel = require('../models/period');
 
 exports.getTeam = function (req, res) {
 
@@ -92,7 +94,7 @@ exports.index = function (req, res) {
 
     DevelopmentManagerModel
     .findOne({_id: req.params.role_id})
-    .populate("team team.skills team.schedule")
+    .populate("team")
     .exec(function (err, resources) {
 
         if (err) {
@@ -103,60 +105,72 @@ exports.index = function (req, res) {
             return res.status(404).send();
         }
 
-        var team = resources.toObject();
-        team = team.team;
+        ScheduleModel.populate(resources.team, "schedule", function (err, resourcesWithSchedule) {
 
-        if (!team.length) {
-            return res.status(200).send(null);
-        }
-
-        // get projects from api
-        request({
-            method: 'GET',
-            uri: api_uri + 'grouped_projects'
-        }, function (error, response, body) {
-            if (!error && response.statusCode == 200) {
-
-                body = JSON.parse(body);
-
-                var queue = [];
-
-                // merge projects into resources
-                for (var i = 0, l = team.length; i < l; ++ i) {
-                    (function (i) {
-                        var schedule = team[i].schedule;
-
-                        for (var j = 0; j < schedule.length; ++ j) {
-                            schedule.project = body[schedule.project];
-                        }
-
-                        request({
-                            method: 'GET',
-                            uri: api_uri + 'resources/' + team[i].resource_id
-                        }, function (error, response, body) {
-                            body = JSON.parse(body);
-
-                            if (!body) {
-                                return;
-                            }
-
-                            team[i].first_name = body.first_name;
-                            team[i].last_name = body.last_name;
-                            team[i].position = body.position;
-                            team[i].hours = body.hours;
-
-                            queue.push("@");
-
-                            if (queue.length === team.length) {
-                                // everything okay, send the merged response
-                                res.status(200).send(team);
-                            }
-                        });
-                    })(i);
-                }
-            } else {
-                res.status(500).send(error);
+            if (err) {
+                return res.status(400).send(err);
             }
+
+            PeriodModel.populate(resourcesWithSchedule, "schedule.periods", function (err, resourcesWithPeriods) {
+                if (err) {
+                    return res.status(400).send(err);
+                }
+
+                var team = JSON.parse(JSON.stringify(resourcesWithPeriods.toObject()));
+
+                if (!team.length) {
+                    return res.status(200).send(null);
+                }
+
+                // get projects from api
+                request({
+                    method: 'GET',
+                    uri: api_uri + 'grouped_projects'
+                }, function (error, response, body) {
+                    if (!error && response.statusCode == 200) {
+
+                        body = JSON.parse(body);
+
+                        var queue = [];
+
+                        // merge projects into resources
+                        for (var i = 0, l = team.length; i < l; ++ i) {
+                            (function (i) {
+                                var schedule = team[i].schedule;
+
+                                for (var j = 0; j < schedule.length; ++ j) {
+                                    schedule[j].project = body[schedule[j].project];
+                                }
+
+                                request({
+                                    method: 'GET',
+                                    uri: api_uri + 'resources/' + team[i].resource_id
+                                }, function (error, response, body) {
+                                    body = JSON.parse(body);
+
+                                    if (!body) {
+                                        return;
+                                    }
+
+                                    team[i].first_name = body.first_name;
+                                    team[i].last_name = body.last_name;
+                                    team[i].position = body.position;
+                                    team[i].hours = body.hours;
+
+                                    queue.push("@");
+
+                                    if (queue.length === team.length) {
+                                        // everything okay, send the merged response
+                                        res.status(200).send(team);
+                                    }
+                                });
+                            })(i);
+                        }
+                    } else {
+                        res.status(500).send(error);
+                    }
+                });
+            });
         });
     });
 };
