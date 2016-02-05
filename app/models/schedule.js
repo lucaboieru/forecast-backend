@@ -8,14 +8,10 @@ var ScheduleSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    resource_id: {
-        type: ObjectId,
-        ref: 'Resource'
-    },
     periods: [
         {
             type: ObjectId,
-            ref: 'PeriodModel'
+            ref: 'Period'
         }
     ]
 });

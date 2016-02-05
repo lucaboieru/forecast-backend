@@ -9,13 +9,20 @@ exports.getTeam = function (req, res) {
 
     DevelopmentManagerModel
     .findById(req.params.role_id)
-    .exec(function (err, resources) {
+    .populate("team")
+    .exec(function (err, roleObj) {
 
         if (err) {
             return res.status(400).send(err);
         }
 
-        res.status(200).send(JSON.stringify(resources));
+        roleObj = roleObj.toObject();
+
+        for (var i = 0; i < roleObj.team.length; ++ i) {
+            roleObj.team[i] = roleObj.team[i].resource_id;
+        }
+
+        res.status(200).send(roleObj);
     });
 };
 
@@ -75,15 +82,19 @@ exports.removeFromTeam = function (req, res) {
 exports.index = function (req, res) {
 
     DevelopmentManagerModel
-    .findById(req.params.role_id)
+    .findOne({_id: req.params.role_id})
     .populate("team")
-    .populate("team.skills")
-    .populate("team.schedule")
     .exec(function (err, resources) {
 
         if (err) {
             return res.status(400).send(err);
         }
+
+        if (!resources) {
+            return res.status(404).send();
+        }
+
+        resources = resources.toObject();
 
         // get projects from api
         request({
