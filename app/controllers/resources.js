@@ -18,10 +18,6 @@ exports.getTeam = function (req, res) {
 
         roleObj = roleObj.toObject();
 
-        for (var i = 0; i < roleObj.team.length; ++ i) {
-            roleObj.team[i] = roleObj.team[i].resource_id;
-        }
-
         res.status(200).send(roleObj);
     });
 };
@@ -69,7 +65,18 @@ exports.removeFromTeam = function (req, res) {
             return res.status(500).send(err);
         }
 
-        DevelopmentManagerModel.update({_id: params.role_id}, {$pull: {team: params.resource_id}}, function (err) {
+        var crudObj = {
+            q: {
+                _id: params.role_id
+            },
+            u: {
+                $pull: {
+                    team: params.resource_id
+                }
+            }
+        };
+
+        DevelopmentManagerModel.update(crudObj.q, crudObj.u, function (err) {
             if (err) {
                 return res.status(500).send(err);
             }
