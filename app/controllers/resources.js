@@ -59,7 +59,9 @@ exports.removeFromTeam = function (req, res) {
 
     var params = req.params;
 
-    ResourceModel.remove({_id: params.resource_id}, function (err) {
+    ResourceModel.findOneAndRemove({
+        resource_id: params.resource_id
+    }, function (err, removed) {
 
         if (err) {
             return res.status(500).send(err);
@@ -71,7 +73,7 @@ exports.removeFromTeam = function (req, res) {
             },
             u: {
                 $pull: {
-                    team: params.resource_id
+                    team: removed._id
                 }
             }
         };
