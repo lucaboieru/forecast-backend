@@ -127,7 +127,7 @@ exports.index = function (req, res) {
                         var schedule = team[i].schedule;
 
                         for (var j = 0; j < schedule.length; ++ j) {
-                            project = body[project];
+                            schedule.project = body[schedule.project];
                         }
 
                         request({
