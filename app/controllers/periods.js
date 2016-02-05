@@ -43,7 +43,8 @@ exports.create = function (req, res) {
                 }
             },
             o: {
-                upsert: true
+                upsert: true,
+                new: true
             }
         };
 
@@ -59,10 +60,13 @@ exports.create = function (req, res) {
                     $addToSet: {
                         schedule: update._id
                     }
+                },
+                o {
+                    new: true
                 }
             };
 
-            ResourceModel.update(crudObj.q, crudObj.u, function (err, update) {
+            ResourceModel.update(crudObj.q, crudObj.u, crudObj.o, function (err, update) {
                 res.status(200).send(update);
             });
         });
