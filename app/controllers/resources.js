@@ -59,7 +59,7 @@ exports.removeFromTeam = function (req, res) {
 
     var params = req.params;
 
-    ResourceModel.remove({resource_id: params.resource_id}, function (err) {
+    ResourceModel.remove({_id: params.resource_id}, function (err) {
 
         if (err) {
             return res.status(500).send(err);
