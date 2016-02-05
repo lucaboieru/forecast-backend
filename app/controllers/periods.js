@@ -5,19 +5,20 @@ var PeriodModel = require('../models/period.js');
 var ScheduleModel = require('../models/schedule.js');
 
 exports.index = function (req, res) {
-    ScheduleModel.find(function (err, periods) {
+    ScheduleModel.find()
+    .populate("project periods").exec(function (err, periods) {
         if (err) {
             return res.status(400).send(err);
         }
 
-        res.status(200).send(JSON.stringify(periods));
+        res.status(200).send(periods);
     });
 };
 
 exports.create = function (req, res) {
 
-    var pid = req.body.pid;
-    var rid = req.body.rid;
+    var pid = req.body.project_id;
+    var rid = req.body.resource_id;
 
     // create period
     var newPeriod = new PeriodModel(req.body.period);
@@ -48,7 +49,6 @@ exports.create = function (req, res) {
 
         // upsert schedule model
         ScheduleModel.findOneAndUpdate(crudObj.q, crudObj.u, crudObj.o, function (err, update) {
-            console.log(update);
 
             // update resource model
             var crudObj = {
@@ -63,7 +63,7 @@ exports.create = function (req, res) {
             };
 
             ResourceModel.update(crudObj.q, crudObj.u, function (err, update) {
-                res.status(200).send(JSON.stringify(update));
+                res.status(200).send(update);
             });
         });
     });
@@ -77,7 +77,7 @@ exports.show = function (req, res) {
             return res.status(400).send(err);
         }
 
-        res.status(200).send(JSON.stringify(resources));
+        res.status(200).send(resources);
     });
 };
 
@@ -89,7 +89,7 @@ exports.remove = function (req, res) {
             return res.status(400).send(err);
         }
 
-        res.status(200).send(JSON.stringify(removed));
+        res.status(200).send(removed);
     });
 };
 
@@ -109,6 +109,6 @@ exports.update = function (req, res) {
             return res.status(400).send(err);
         }
 
-        res.status(200).send(JSON.stringify(place));
+        res.status(200).send(place);
     });
 };
