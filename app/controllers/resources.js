@@ -92,7 +92,7 @@ exports.index = function (req, res) {
 
     DevelopmentManagerModel
     .findOne({_id: req.params.role_id})
-    .populate("team")
+    .populate("team team.skills team.schedule")
     .exec(function (err, resources) {
 
         if (err) {
