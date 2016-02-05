@@ -61,7 +61,7 @@ exports.create = function (req, res) {
                         schedule: update._id
                     }
                 },
-                o {
+                o: {
                     new: true
                 }
             };
