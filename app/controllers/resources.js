@@ -106,6 +106,10 @@ exports.index = function (req, res) {
         var team = resources.toObject();
         team = team.team;
 
+        if (!team) {
+            return res.status(200).send(null);
+        }
+
         // get projects from api
         request({
             method: 'GET',
