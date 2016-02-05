@@ -94,7 +94,8 @@ exports.index = function (req, res) {
             return res.status(404).send();
         }
 
-        resources = resources.toObject();
+        var team = resources.toObject();
+        team = team.team;
 
         // get projects from api
         request({
@@ -103,30 +104,43 @@ exports.index = function (req, res) {
         }, function (error, response, body) {
             if (!error && response.statusCode == 200) {
 
-                // merge projects into resources
-                for (var i = 0, l = resources.length; i < l; ++ i) {
-                    (function (i) {
-                        var schedule = resources[i].schedule;
+                body = JSON.parse(body);
 
-                        request({
-                            method: 'GET',
-                            uri: api_uri + 'resources/' + resources[i].resource_id
-                        }, function (error, response, body) {
-                            body = JSON.parse(body);
-                            resources[i].first_name = body.first_name;
-                            resources[i].last_name = body.last_name;
-                            resources[i].position = body.position;
-                            resources[i].hours = body.hours;
-                        });
+                var queue = [];
+
+                // merge projects into resources
+                for (var i = 0, l = team.length; i < l; ++ i) {
+                    (function (i) {
+                        var schedule = team[i].schedule;
 
                         for (var j = 0; j < schedule.length; ++ j) {
                             project = body[project];
                         }
+
+                        request({
+                            method: 'GET',
+                            uri: api_uri + 'resources/' + team[i].resource_id
+                        }, function (error, response, body) {
+                            body = JSON.parse(body);
+
+                            if (!body) {
+                                return;
+                            }
+
+                            team[i].first_name = body.first_name;
+                            team[i].last_name = body.last_name;
+                            team[i].position = body.position;
+                            team[i].hours = body.hours;
+
+                            queue.push("@");
+
+                            if (queue.length === team.length) {
+                                // everything okay, send the merged response
+                                res.status(200).send(team);
+                            }
+                        });
                     })(i);
                 }
-
-                // everything okay, send the merged response
-                res.status(200).send(JSON.stringify(resources));
             } else {
                 res.status(500).send(error);
             }
