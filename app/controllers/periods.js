@@ -70,7 +70,7 @@ exports.create = function (req, res) {
             };
 
             ResourceModel.findOneAndUpdate(crudObj.q, crudObj.u, crudObj.o, function (err, update) {
-                res.status(200).send(update);
+                res.status(200).send(period);
             });
         });
     });
