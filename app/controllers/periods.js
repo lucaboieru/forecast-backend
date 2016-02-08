@@ -50,6 +50,9 @@ exports.create = function (req, res) {
 
         // upsert schedule model
         ScheduleModel.findOneAndUpdate(crudObj.q, crudObj.u, crudObj.o, function (err, update) {
+            if (err) {
+                return res.status(400).send(err);
+            }
 
             // update resource model
             var crudObj = {
@@ -66,7 +69,7 @@ exports.create = function (req, res) {
                 }
             };
 
-            ResourceModel.update(crudObj.q, crudObj.u, crudObj.o, function (err, update) {
+            ResourceModel.findOneAndUpdate(crudObj.q, crudObj.u, crudObj.o, function (err, update) {
                 res.status(200).send(update);
             });
         });
