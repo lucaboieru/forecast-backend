@@ -54,6 +54,8 @@ exports.create = function (req, res) {
                 return res.status(400).send(err);
             }
 
+            var scheduleId = update._id;
+
             // update resource model
             var crudObj = {
                 q: {
@@ -70,7 +72,10 @@ exports.create = function (req, res) {
             };
 
             ResourceModel.findOneAndUpdate(crudObj.q, crudObj.u, crudObj.o, function (err, update) {
-                res.status(200).send(period);
+                res.status(200).send({
+                    schedule_id: scheduleId,
+                    period_id: update._id
+                });
             });
         });
     });
