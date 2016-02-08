@@ -81,8 +81,8 @@ router.route('/periods')
     .get(periodController.index);
 
 router.route('/periods/:pid')
-    .get(periodController.show);
-    //.put(periodController.update)
+    .get(periodController.show)
+    .put(periodController.update);
     //.delete(periodController.remove);
 
 // REMOTE API ROUTES

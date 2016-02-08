@@ -105,10 +105,13 @@ exports.update = function (req, res) {
         q: {
             _id: pid
         },
-        o: req.body
+        u: req.body,
+        o: {
+            new: true
+        }
     };
 
-    PeriodModel.findOneAndUpdate(crudObj.q, crudObj.o, function (err, place) {
+    PeriodModel.findOneAndUpdate(crudObj.q, crudObj.u, crudObj.o, function (err, place) {
         if (err) {
             return res.status(400).send(err);
         }
