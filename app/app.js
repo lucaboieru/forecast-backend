@@ -67,9 +67,12 @@ router.route('/users')
     .get(userController.index);
 
 router.route('/users/:uid')
-    .get(userController.show);
-    //.put(userController.update)
+    .get(userController.show)
+    .put(userController.update);
     //.delete(userController.remove);
+
+router.route('/users/:uid/initialize_password')
+    .put(userController.initializePassword);
 
 // PERIOD API
 router.route('/login')

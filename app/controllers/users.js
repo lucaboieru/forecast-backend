@@ -49,6 +49,40 @@ exports.create = function (req, res) {
     }
 };
 
+exports.update = function (req, res) {
+    res.status(200).send();
+};
+
+exports.initializePassword = function (req, res) {
+    var userId = req.params.uid;
+    var password = req.body.password;
+
+    var crudObj = {
+        q: {
+            _id: userId,
+            password_changed: false
+        },
+        u: {
+            $set: {
+                password: password,
+                password_changed: true
+            }
+        }
+    };
+
+    UserModel.update(crudObj.q, crudObj.u, function (err, doc) {
+        if (err) {
+            return res.status(400).send(err);
+        }
+
+        if (!doc) {
+            return res.status(404).send();
+        }
+
+        res.status(200).send();
+    });
+};
+
 exports.show = function (req, res) {
 
     var uid = req.params.uid;
