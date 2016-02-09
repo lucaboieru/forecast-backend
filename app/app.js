@@ -61,6 +61,10 @@ router.route('/skills/:sid')
     .put(skillController.update)
     .delete(skillController.remove);
 
+router.route('/skillset')
+    .get(skillController.getSkillSet)
+    .post(skillController.addToSkillSet);
+
 // USER API
 router.route('/users')
     .post(userController.create)

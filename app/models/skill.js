@@ -1,11 +1,17 @@
 // Load required packages
 var mongoose = require('mongoose');
+var ObjectId = mongoose.Schema.ObjectId;
 
 // Define user schema
 var SkillSchema = new mongoose.Schema({
-    name: {
-        type: String,
-        required: true
+    skill: {
+        type: ObjectId,
+        ref: 'SkillSet'
+    },
+    level: {
+    	type: Number,
+    	required: true,
+    	enum: [1, 2, 3]
     }
 });
 

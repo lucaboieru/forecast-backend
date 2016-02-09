@@ -11,8 +11,7 @@ var ResourceSchema = new mongoose.Schema({
     skills: [
         {
             type: ObjectId,
-            ref: 'Skill',
-            required: true
+            ref: 'Skill'
         },
     ],
     schedule: [

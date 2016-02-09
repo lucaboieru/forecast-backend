@@ -6,21 +6,35 @@ var UserModel = require('../models/user');
 var DevelopmentManagerModel = require('../models/devman');
 var ScheduleModel = require('../models/schedule');
 var PeriodModel = require('../models/period');
+var SkillModel = require('../models/skill');
+var SkillSetModel = require('../models/skillset');
 
 exports.getTeam = function (req, res) {
 
     DevelopmentManagerModel
     .findById(req.params.role_id)
     .populate("team")
-    .exec(function (err, roleObj) {
+    .exec(function (err, resources) {
 
         if (err) {
             return res.status(400).send(err);
         }
 
-        roleObj = roleObj.toObject();
+        SkillModel.populate(resources.team, "skills", function (err, resourcesWithLevels) {
+            if (err) {
+                return res.status(400).send(err);
+            }
 
-        res.status(200).send(roleObj);
+            SkillSetModel.populate(resourcesWithLevels, "skills.skill", function (err, resourcesWithSkills) {
+                if (err) {
+                    return res.status(400).send(err);
+                }
+
+                resourcesWithSkills = resourcesWithSkills.toObject();
+
+                res.status(200).send(resourcesWithSkills);
+            });
+        });
     });
 };
 
