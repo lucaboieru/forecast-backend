@@ -20,8 +20,6 @@ exports.create = function (req, res) {
     var pid = req.body.project_id;
     var rid = req.body.resource_id;
 
-    req.body.period.schedule_id = req.body.period.schedule_id || "placeholder";
-
     // create period
     var newPeriod = new PeriodModel(req.body.period);
 
@@ -58,31 +56,25 @@ exports.create = function (req, res) {
 
             var scheduleId = update._id;
 
-            PeriodModel.update({_id: periodId}, {$set: {schedule_id: scheduleId}}, function (err, updatedPeriod) {
-                if (err) {
-                    return res.status(400).send(err);
-                }
-
-                // update resource model
-                var crudObj = {
-                    q: {
-                        _id: rid,
-                    },
-                    u: {
-                        $addToSet: {
-                            schedule: update._id
-                        }
-                    },
-                    o: {
-                        new: true
+            // update resource model
+            var crudObj = {
+                q: {
+                    _id: rid,
+                },
+                u: {
+                    $addToSet: {
+                        schedule: update._id
                     }
-                };
+                },
+                o: {
+                    new: true
+                }
+            };
 
-                ResourceModel.findOneAndUpdate(crudObj.q, crudObj.u, crudObj.o, function (err, update) {
-                    res.status(200).send({
-                        schedule_id: scheduleId,
-                        period_id: update._id
-                    });
+            ResourceModel.findOneAndUpdate(crudObj.q, crudObj.u, crudObj.o, function (err, update) {
+                res.status(200).send({
+                    schedule_id: scheduleId,
+                    period_id: update._id
                 });
             });
         });
@@ -103,6 +95,7 @@ exports.show = function (req, res) {
 
 exports.remove = function (req, res) {
     var pid = req.params.pid;
+    var scheduleId = req.data.schedule_id;
 
     var crudObj = {
         q: {
@@ -114,10 +107,6 @@ exports.remove = function (req, res) {
         if (err) {
             return res.status(400).send(err);
         }
-
-        console.log(removed);
-
-        var scheduleId = removed.schdule_id;
 
         var crudObj = {
             q: {
@@ -131,7 +120,7 @@ exports.remove = function (req, res) {
             }
         };
 
-        ScheduleModel.update(crudObj.q, crudObj.u, crudObj.o, function (err, update) {
+        ScheduleModel.findOneAndUpdate(crudObj.q, crudObj.u, crudObj.o, function (err, update) {
             if (err) {
                 return res.status(400).send(err);
             }
@@ -143,6 +132,8 @@ exports.remove = function (req, res) {
                     if (err) {
                         return res.status(400).send(err);
                     }
+
+                    console.log(remove);
 
                     var resourceId = remove.resource_id;
 
