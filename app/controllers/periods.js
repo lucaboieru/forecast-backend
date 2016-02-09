@@ -95,7 +95,7 @@ exports.show = function (req, res) {
 
 exports.remove = function (req, res) {
     var pid = req.params.pid;
-    var scheduleId = req.data.schedule_id;
+    var scheduleId = req.params.sid;
 
     var crudObj = {
         q: {
@@ -125,15 +125,11 @@ exports.remove = function (req, res) {
                 return res.status(400).send(err);
             }
 
-            console.log(update);
-
-            if (!update.periods.length) {
+            if (!update || !update.periods || !update.periods.length) {
                 ScheduleModel.remove({_id: scheduleId}, function (err, remove) {
                     if (err) {
                         return res.status(400).send(err);
                     }
-
-                    console.log(remove);
 
                     var resourceId = remove.resource_id;
 
