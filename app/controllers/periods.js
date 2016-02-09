@@ -96,12 +96,71 @@ exports.show = function (req, res) {
 exports.remove = function (req, res) {
     var pid = req.params.pid;
 
-    PeriodModel.remove({_id: pid}, function (err, removed) {
+    var crudObj = {
+        q: {
+            _id: pid
+        }
+    };
+
+    PeriodModel.remove(crudObj.q, function (err, remove) {
         if (err) {
             return res.status(400).send(err);
         }
 
-        res.status(200).send(removed);
+        console.log(removed);
+
+        var scheduleId = removed.schdule_id;
+
+        var crudObj = {
+            q: {
+                _id: scheduleId
+            },
+            u: {
+                $pull: { periods: pid }
+            },
+            o: {
+                new: true
+            }
+        };
+
+        ScheduleModel.update(crudObj.q, crudObj.u, crudObj.o, function (err, update) {
+            if (err) {
+                return res.status(400).send(err);
+            }
+
+            console.log(update);
+
+            if (!update.periods.length) {
+                ScheduleModel.remove({_id: scheduleId}, function (err, remove) {
+                    if (err) {
+                        return res.status(400).send(err);
+                    }
+
+                    var resourceId = remove.resource_id;
+
+                    var crudObj = {
+                        q: {
+                            _id: resourceId
+                        },
+                        u: {
+                            $pull: { schedule: remove._id }
+                        },
+                        o: {
+                            new: true
+                        }
+                    };
+
+                    ResourceModel.update(crudObj.q, crudObj.u, crudObj.o, function (err, update) {
+                        if (err) {
+                            return res.status(400).send(err);
+                        }
+                        res.status(200).send();
+                    });
+                });
+            } else {
+                res.status(200).send();
+            }
+        });
     });
 };
 

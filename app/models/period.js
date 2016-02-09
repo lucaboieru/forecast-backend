@@ -3,6 +3,10 @@ var mongoose = require('mongoose');
 
 // Define user schema
 var PeriodSchema = new mongoose.Schema({
+    schedule_id: {
+        type: String,
+        required: true
+    },
     from: {
         type: String,
         required: true
