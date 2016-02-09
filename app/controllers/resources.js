@@ -30,9 +30,36 @@ exports.getTeam = function (req, res) {
                     return res.status(400).send(err);
                 }
 
-                resourcesWithSkills = resourcesWithSkills.toObject();
+                resourcesWithSkills = JSON.parse(JSON.stringify(resourcesWithSkills.toObject()));
+                var queue = [];
 
-                res.status(200).send(resourcesWithSkills);
+                for (var i = 0; i < resourcesWithSkills.length; ++ i) {
+                    (function (i) {
+                        request({
+                            method: 'GET',
+                            uri: api_uri + 'resources/' + resourcesWithSkills[i].resource_id
+                        }, function (error, response, body) {
+                            body = JSON.parse(body);
+
+                            if (!body) {
+                                return;
+                            }
+
+                            resourcesWithSkills[i].first_name = body.first_name;
+                            resourcesWithSkills[i].last_name = body.last_name;
+                            resourcesWithSkills[i].position = body.position;
+                            resourcesWithSkills[i].hours = body.hours;
+                            resourcesWithSkills[i].image = body.image;
+
+                            queue.push("@");
+
+                            if (queue.length === resourcesWithSkills.length) {
+                                // everything okay, send the merged response
+                                res.status(200).send(resourcesWithSkills);
+                            }
+                        });
+                    })(i);
+                }
             });
         });
     });
@@ -170,6 +197,7 @@ exports.index = function (req, res) {
                                     team[i].last_name = body.last_name;
                                     team[i].position = body.position;
                                     team[i].hours = body.hours;
+                                    team[i].image = body.image;
 
                                     queue.push("@");
 
