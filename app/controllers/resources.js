@@ -20,9 +20,17 @@ exports.getTeam = function (req, res) {
             return res.status(400).send(err);
         }
 
+        if (!resources) {
+            return res.status(200).send([]);
+        }
+
         SkillModel.populate(resources.team, "skills", function (err, resourcesWithLevels) {
             if (err) {
                 return res.status(400).send(err);
+            }
+
+            if (!resourcesWithLevels) {
+                return res.status(200).send([]);
             }
 
             SkillSetModel.populate(resourcesWithLevels, "skills.skill", function (err, resourcesWithSkills) {
@@ -32,6 +40,10 @@ exports.getTeam = function (req, res) {
 
                 resourcesWithSkills = JSON.parse(JSON.stringify(resourcesWithSkills.toObject()));
                 var queue = [];
+
+                if (!resourcesWithSkills) {
+                    return res.status(200).send([]);
+                }
 
                 for (var i = 0; i < resourcesWithSkills.length; ++ i) {
                     (function (i) {
