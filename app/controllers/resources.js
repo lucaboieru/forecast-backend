@@ -29,7 +29,7 @@ exports.getTeam = function (req, res) {
                 return res.status(400).send(err);
             }
 
-            if (!resourcesWithLevels) {
+            if (!resourcesWithLevels.length) {
                 return res.status(200).send([]);
             }
 
@@ -41,7 +41,7 @@ exports.getTeam = function (req, res) {
                 resourcesWithSkills = JSON.parse(JSON.stringify(resourcesWithSkills.toObject()));
                 var queue = [];
 
-                if (!resourcesWithSkills) {
+                if (!resourcesWithSkills.length) {
                     return res.status(200).send([]);
                 }
 
